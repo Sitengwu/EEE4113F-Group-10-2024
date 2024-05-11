@@ -3,7 +3,11 @@
 #include <ESPAsyncWebServer.h>
 #include <SD.h>
 
-const char* filepath = "/Test.txt";
+unsigned long previousMillis = 0;
+unsigned long currentMillis = 0;
+const long interval = 30000; // 1 minute in milliseconds
+
+const char* filepath = "/Data.txt";
 boolean rcd = false;
 volatile bool wifiInt = false;
 
@@ -16,57 +20,86 @@ IPAddress subnet(255, 255, 255, 0);
 
 AsyncWebServer server(80);
 
+void IRAM_ATTR handleInterrupt() {
+  // Your interrupt handling code here
+  if(WiFi.getMode() != WIFI_AP)
+  {
+    Serial.println("Remote triggered...");
+    wifiInt = true;
+  }
+}
+
 void setup() {
   Serial.begin(115200);
-  
-  pinMode(interruptPin, INPUT_PULLDOWN);
+  WiFi.mode(WIFI_OFF);
 
   // Attach interrupt to the GPIO pin
-  attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, RISING);
+  attachInterrupt(digitalPinToInterrupt(6), handleInterrupt, HIGH);
   
   if (!SD.begin()) {
     Serial.println("Card Mount Failed");
     return;
   }
+  // Set up wake up using timer for 6 seconds
+  esp_sleep_enable_timer_wakeup(10 * 1000000);  // 6 seconds in microseconds
+
+  // Set up wake up using external interrupt on specified pin
+  esp_sleep_enable_ext1_wakeup(BIT(6), ESP_EXT1_WAKEUP_ANY_HIGH);
 }
 
 void loop() 
 {
   if (rcd)
   {
+    Serial.print("Shutting down WiFi");
+    server.end();
     WiFi.softAPdisconnect(true);
     rcd = false;
+    esp_deep_sleep_start();
   }
 
   if (wifiInt)
   { 
-    Serial.print("Setting AP (Access Point)...");
+    Serial.println("Starting Access Point");
     WiFi.softAPConfig(localIP, gateway, subnet);
     WiFi.softAP(ssid, password);
     
     server.on("/download", HTTP_GET, serveFile);
     server.on("/received", HTTP_GET, received);
     server.begin();
-
+    Serial.println("Access Point Started");
+    previousMillis = millis();
     wifiInt = false;
+    delay(5000);
   }
 
-}
-
-void IRAM_ATTR handleInterrupt() {
-  // Your interrupt handling code here
-  if(WiFi.softAPgetHostname() != "")
+  while(WiFi.softAPgetStationNum()==0 && WiFi.getMode() == WIFI_MODE_AP)
   {
-    wifiInt = true;
+    currentMillis = millis();
+    Serial.println("Waiting for connection...");
+    delay(1000);
+    if (currentMillis - previousMillis >= interval) 
+    {
+      // Update the previousMillis for the next interval
+      currentMillis = 0;
+      Serial.println("Connection Timeout: Shutting down WiFi");
+      // Turn off WiFi
+      server.end();
+      WiFi.softAPdisconnect(true);
+      delay(5000);
+    }
+  }
+  if(WiFi.getMode() == WIFI_OFF)
+  {
+    esp_deep_sleep_start();
   }
 }
 
 void received(AsyncWebServerRequest *request) {
-  request->send(200, "text/plain", "Shutting down...");
+  request->send(200, "text/plain", "Turning WiFi Off");
   rcd = true;
   SD.remove(filepath);
   File file = SD.open(filepath, FILE_WRITE);
-  file.print("Hello World!\n");
   file.close();
 }
 

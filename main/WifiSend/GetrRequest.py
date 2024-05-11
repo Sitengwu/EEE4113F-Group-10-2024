@@ -12,7 +12,7 @@ response = requests.get(geturl)
 # Check if the request was successful (status code 200)
 if response.status_code == 200:
     # Write the content of the response to a text file
-    with open('downloaded_file.txt', 'w') as file:
+    with open('WifiSend\downloaded_file.txt', 'w') as file:
         file.write(response.text)
     print("File downloaded successfully.")
 else:

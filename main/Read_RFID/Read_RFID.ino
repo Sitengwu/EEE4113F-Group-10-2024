@@ -1,31 +1,18 @@
-String text;
+String ID;
+String Birds[] = {"33000CE379A5", "33000D51AAC5", "33000E15674F"};
 
 void setup()
 {
   Serial.begin(115200);
+  Serial1.setRxBufferSize(129);
   Serial1.begin(9600, SERIAL_8N1, 4, 5);
-  // Serial.flush(); // wait Serial FIFO to be empty and then spend almost no time processing it
-  // Serial1.setRxFIFOFull(20); // testing diferent result based on FIFO Full setup
-  // Serial1.onReceive(onReceiveFunction, onlyOnTimeOut); // sets a RX callback function for Serial 1
 }
 char c;
 
 void loop()
 {
-  while (Serial1.available() > 0) 
-  {
-    c = Serial1.read();
-    text += c;
-    if (text.length() > 20)
-    {
-      if (check())
-      {
-        clearSerialBuffer();
-        break;
-      }  
-    }
-  }
-  delay(1000);
+  readRFID();
+  ID = "";
 }
 
 void clearSerialBuffer() {
@@ -36,27 +23,55 @@ void clearSerialBuffer() {
 
 bool isAlphanumeric(String str) {
   // Iterate through each character of the string
-  for (int i = 0; str[i] != '\0'; i++) {
+  for (char c: str) {
     // Check if the character is not a digit or a letter
-    if (!isalnum(str[i])) {
+    if (!isalnum(c) || c == '\0') {
       return false; // Return false if it's not alphanumeric
     }
   }
   return true; // Return true if all characters are alphanumeric
 }
 
-boolean check()
+bool readRFID()
 {
-  text = text.substring(1, 11);
-
-  if(isAlphanumeric(text))
+  clearSerialBuffer();
+  delay(300);
+  while (Serial1.available() > 0) 
   {
-    Serial.println("Card ID : " + text);
-    text = "";
-    delay(100);
-    return true;
+    c = Serial1.read();
+    ID += c;
+    if (ID.length() > 20)
+    {
+      switch (check()) 
+      {
+        case 0: 
+          Serial.println("Bird Detected - ID: " + ID);
+          clearSerialBuffer();
+          return true;
+        case 1: 
+          Serial.println("Not a Bird - ID: " + ID);
+          clearSerialBuffer();
+          return false;
+      }
+      clearSerialBuffer();
+      return false;
+    }
   }
-  text = "";
-  delay(100);  
-  return false;
+}
+
+uint8_t check()
+{
+  ID = ID.substring(1, 13);
+  if(isAlphanumeric(ID))
+  {
+    for(String s: Birds)
+    {
+      if(ID == s)
+      {
+        return 0;
+      }
+    }
+    return 1;
+  }
+  return 2;
 }
