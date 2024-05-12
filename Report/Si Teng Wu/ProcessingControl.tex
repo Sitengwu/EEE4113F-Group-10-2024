@@ -1,0 +1,108 @@
+\documentclass[class=report,11pt,crop=false]{standalone}
+% \usepackage{array}
+\usepackage{adjustbox}
+\input{../Style/ChapterStyle.tex}
+\input{../FrontMatter/Glossary.tex}
+\begin{document}
+% ----------------------------------------------------
+\chapter{Processing and Control}
+
+\textbf{\textit{Prepared by Si Teng Wu - WXXSIT001}}
+\vspace{0.5cm}
+% ----------------------------------------------------
+\section{Introduction}
+This subsystem involves designing a hardware solution and software for controlling the collection, processing, storage and transmission of data as well as an identification solution. It has been divivded into the following submodules: Identification, Weight Processing, Storage, Transmission, System Control and Power Saving Techniques. Throguh the use of a micro-controller module, and various other hardware modules, this subsytem will be the "brain" of the system and act as the central hub for data while the system is in the field. This subsystem will receive input data from the Scale and Power susbsystems and provide output data to the UI subsystem.
+
+\section{Requirements and Specifications}
+\subsection*{User Requirements}
+The stakeholder/user, Carrie Hickman, a PhD student at the Fitzpatrick Institute of African Ornithology, UCT, has provided the following user requirements that are releveant to this susbsystem for her problem. %These requirements were collected through stakeholder engagements of the EEE4113F Teams \cite{stakeholder}.
+\begin{itemize}
+    \item The bird being wieghed needs to be identified.
+    \item The weight should be accurate to within a gram.
+    \item There should be some way to collect data without climbing the tree.
+    \item The user specified data should be stored on an SD card as back-up.
+    \item The system should last two weeks.
+\end{itemize}
+
+
+\subsection*{Requirements Analysis}
+
+Using these user requirements, the following functional requirements (FR), specfications (SP) and Acceptance Test Procedures (ATP) were created. The specfications provides a standard for the subsystem and the ATPs will be used to test the standards of the proposed solution.
+
+\begin{table}[h]
+    \adjustbox{width=\textwidth}
+    {\begin{tabular}{|c|p{0.8\linewidth}|}
+            \hline
+            \textbf{FR ID} & \textbf{Functional Requirement}                                                \\
+            \hline
+            FR-1 & Control the system using a microcontroller. \\
+            \hline
+            FR-2 & Use a suitable identification technique on the bird as it is being weighed. \\
+            \hline
+            FR-3 & Collect diagnostic battery data. \\
+            \hline
+            FR-4 & Collect the weight data. \\
+            \hline
+            FR-5 & Develop a weight processing algorithm that can process the weight data. \\
+            \hline
+            FR-6 & Store the data on local, non-volatile and removable storage. \\
+            \hline
+            FR-7 & Transmit the data wirelessly from the nest to the user's device on the ground. \\
+            \hline
+            FR-8 & Use power saving techniques to limit the use of power. \\
+            \hline
+        \end{tabular}}
+    \caption{Functional Requirements of the subsystem}
+    \label{tab:FR}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \small
+    \adjustbox{width=\textwidth}
+    {\begin{tabular}{|c|p{0.6\linewidth}|c|c|}
+    \hline
+    \textbf{SP ID} & \textbf{Specification} & \textbf{FR ID} & \textbf{ATP ID} \\
+    \hline
+    SP-1 & Use the ESP32 S3 Dev Module operating at 3.3V and <250mA. & FR-1 & ATP-1 \\
+    \hline
+    SP-2 & Use the RDM6300 125kHz RFID module operating at 5V <50mA. & FR-2 & ATP-2 \\
+    \hline
+    SP-3 & The RFID must detect PIT tags at a minimum distance of 5cm and use GPIO pins to switch on/off.  & FR-2 & ATP-3 \\
+    \hline
+    SP-4 & Activate RFID only when the weight exceeds 2.2 kg. & FR-2, FR-8 & ATP-4 \\
+    \hline
+    SP-5 & Use the ADC to read the battery level and calculate it as a percentage. & FR-3 & ATP-5 \\
+    \hline
+    SP-6 & Read the HX711 using I2C every 10 seconds. & FR-4, FR-8 & ATP-6 \\
+    \hline
+    SP-7 & Implement a suitable filtering technique (normal average, moving average, exponential average, or median filter) to process the weight data. & FR-4 & ATP-7 \\
+    \hline
+    SP-8 & Utilize a micro SD card module connected via SPI to store data in a text file format "<weight,ID,battery\%>". & FR-6 & ATP-8 \\
+    \hline
+    SP-9 & Implement a web server over WiFi to transmit data. & FR-7 & ATP-9 \\
+    \hline
+    SP-10 & Utilize deep sleep mode whenever possible to minimize power consumption. & FR-8 & ATP-10 \\
+    \hline
+    SP-11 & Use a 433MHz remote transmitter and receiver to start the WiFi when necessary. & FR-7, FR-8 & ATP-11 \\
+    \hline
+\end{tabular}}
+\caption{System Specifications and associated FRs and ATPs}
+\label{tab:SP}
+\end{table}
+    
+\section{Acceptance Test Procedures}
+
+\section{Design Choices}
+
+\section{Results}
+
+\section{ATP Results}
+
+% ----------------------------------------------------
+\ifstandalone
+    \bibliography{../Bibliography/References.bib}
+    \printnoidxglossary[type=\acronymtype,nonumberlist]
+\fi
+\end{document}
+% ----------------------------------------------------

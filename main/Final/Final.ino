@@ -147,7 +147,7 @@ void loop()
     }
   }
   scale.power_up();
-  if (scale.get_units(1) > 3000) 
+  if (scale.get_units(1) > 2200) 
   {
     if(!birdON)
     {
