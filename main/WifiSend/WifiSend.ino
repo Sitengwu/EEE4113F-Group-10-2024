@@ -40,6 +40,11 @@ void setup() {
     Serial.println("Card Mount Failed");
     return;
   }
+
+  SD.remove(filepath);
+  File f = SD.open(filepath, FILE_WRITE);
+  f.println("Hello World!");
+  f.close();
   // Set up wake up using timer for 6 seconds
   esp_sleep_enable_timer_wakeup(10 * 1000000);  // 6 seconds in microseconds
 

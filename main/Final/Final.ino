@@ -3,7 +3,6 @@
 #include "SD.h"
 #include "SPI.h"
 #include <string>
-#include <cstdio>
 #include <esp_sleep.h>
 #include <EEPROM.h>
 #include <WiFi.h>
