@@ -40,7 +40,7 @@ bool readRFID()
   {
     c = Serial1.read();
     ID += c;
-    if (ID.length() > 20)
+    if (ID.length() > 15)
     {
       switch (check()) 
       {

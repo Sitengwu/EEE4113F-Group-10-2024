@@ -237,7 +237,7 @@ bool readRFID() {
   while (Serial1.available() > 0) {
     c = Serial1.read();
     ID += c;
-    if (ID.length() > 20) {
+    if (ID.length() > 15) {
       switch (check()) {
         case 0:
           Serial.println("Bird Detected - ID: " + ID);
